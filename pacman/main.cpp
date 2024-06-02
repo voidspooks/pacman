@@ -49,6 +49,16 @@ std::string float_to_s(float to_convert) {
     return std::to_string(to_convert);
 }
 
+// Compass for Level
+// "&"   = black space
+// " "   = dot
+// "*"   = intersection w/ dot
+// "%"   = intersection w/ no dot ("*" do have dots)
+// "!"   = powerpill
+// "$"   = intersection w/ powerpill
+// "X"   = ghost house
+// "D"   = door
+
 std::string level[36][28] = {
     { "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&" },
     { "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&", "&" },
@@ -56,7 +66,7 @@ std::string level[36][28] = {
     { "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#" },
     { "#", "*", " ", " ", " ", " ", "*", " ", " ", " ", " ", " ", "*", "#", "#", "*", " ", " ", " ", " ", " ", "*", " ", " ", " ", " ", "*", "#" },
     { "#", " ", "#", "#", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", "#", "#", " ", "#" },
-    { "#", " ", "#", "#", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", "#", "#", " ", "#" },
+    { "#", "!", "#", "#", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", "#", "#", "!", "#" },
     { "#", " ", "#", "#", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", "#", "#", " ", "#" },
     { "#", "*", " ", " ", " ", " ", "*", " ", " ", "*", " ", " ", "*", " ", " ", "*", " ", " ", "*", " ", " ", "*", " ", " ", " ", " ", "*", "#" },
     { "#", " ", "#", "#", "#", "#", " ", "#", "#", " ", "#", "#", "#", "#", "#", "#", "#", "#", " ", "#", "#", " ", "#", "#", "#", "#", " ", "#" },
@@ -65,10 +75,10 @@ std::string level[36][28] = {
     { "#", "#", "#", "#", "#", "#", " ", "#", "#", "#", "#", "#", "&", "#", "#", "&", "#", "#", "#", "#", "#", " ", "#", "#", "#", "#", "#", "#" },
     { "&", "&", "&", "&", "&", "#", " ", "#", "#", "#", "#", "#", "&", "#", "#", "&", "#", "#", "#", "#", "#", " ", "#", "&", "&", "&", "&", "&" },
     { "&", "&", "&", "&", "&", "#", " ", "#", "#", "%", "&", "&", "%", "&", "B", "%", "&", "&", "%", "#", "#", " ", "#", "&", "&", "&", "&", "&" },
-    { "&", "&", "&", "&", "&", "#", " ", "#", "#", "&", "#", "#", "#", "#", "#", "#", "#", "#", "&", "#", "#", " ", "#", "&", "&", "&", "&", "&" },
-    { "#", "#", "#", "#", "#", "#", " ", "#", "#", "&", "#", " ", " ", " ", " ", " ", " ", "#", "&", "#", "#", " ", "#", "#", "#", "#", "#", "#" },
-    { " ", " ", " ", " ", " ", " ", "*", " ", " ", "%", "#", " ", " ", " ", " ", " ", " ", "#", "&", "#", "#", "*", " ", " ", " ", " ", " ", " " },
-    { "#", "#", "#", "#", "#", "#", " ", "#", "#", "&", "#", " ", " ", " ", " ", " ", " ", "#", "&", "#", "#", " ", "#", "#", "#", "#", "#", "#" },
+    { "&", "&", "&", "&", "&", "#", " ", "#", "#", "&", "#", "#", "#", "D", "D", "#", "#", "#", "&", "#", "#", " ", "#", "&", "&", "&", "&", "&" },
+    { "#", "#", "#", "#", "#", "#", " ", "#", "#", "&", "#", "X", "X", "X", "X", "X", "X", "#", "&", "#", "#", " ", "#", "#", "#", "#", "#", "#" },
+    { "&", "&", "&", "&", "&", "&", "*", " ", " ", "%", "#", "X", "X", "X", "X", "X", "X", "#", "&", "#", "#", "*", "&", "&", "&", "&", "&", "&" },
+    { "#", "#", "#", "#", "#", "#", " ", "#", "#", "&", "#", "X", "X", "X", "X", "X", "X", "#", "&", "#", "#", " ", "#", "#", "#", "#", "#", "#" },
     { "&", "&", "&", "&", "&", "#", " ", "#", "#", "&", "#", "#", "#", "#", "#", "#", "#", "#", "&", "#", "#", " ", "#", "&", "&", "&", "&", "&" },
     { "&", "&", "&", "&", "&", "#", " ", "#", "#", "%", "&", "&", "&", "&", "&", "&", "&", "&", "%", "#", "#", " ", "#", "&", "&", "&", "&", "&" },
     { "&", "&", "&", "&", "&", "#", " ", "#", "#", "&", "#", "#", "#", "#", "#", "#", "#", "#", "&", "#", "#", " ", "#", "&", "&", "&", "&", "&" },
@@ -76,7 +86,7 @@ std::string level[36][28] = {
     { "#", "*", " ", " ", " ", " ", "*", " ", " ", "*", " ", " ", "*", "#", "#", "*", " ", " ", "*", " ", " ", "*", " ", " ", " ", " ", "*", "#" },
     { "#", " ", "#", "#", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", "#", "#", " ", "#" },
     { "#", " ", "#", "#", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", " ", "#", "#", "#", "#", "#", " ", "#", "#", "#", "#", " ", "#" },
-    { "#", "*", " ", "*", "#", "#", "*", " ", " ", "*", " ", " ", "*", " ", "O", "*", " ", " ", "*", " ", " ", "*", "#", "#", "*", " ", "*", "#" },
+    { "#", "$", " ", "*", "#", "#", "*", " ", " ", "*", " ", " ", "*", "&", "O", "*", " ", " ", "*", " ", " ", "*", "#", "#", "*", " ", "$", "#" },
     { "#", "#", "#", " ", "#", "#", " ", "#", "#", " ", "#", "#", "#", "#", "#", "#", "#", "#", " ", "#", "#", " ", "#", "#", " ", "#", "#", "#" },
     { "#", "#", "#", " ", "#", "#", " ", "#", "#", " ", "#", "#", "#", "#", "#", "#", "#", "#", " ", "#", "#", " ", "#", "#", " ", "#", "#", "#" },
     { "#", "*", " ", "*", " ", " ", "*", "#", "#", "*", " ", " ", "*", "#", "#", "*", " ", " ", "*", "#", "#", "*", " ", " ", "*", " ", "*", "#" },
@@ -100,7 +110,7 @@ std::pair<std::vector<sf::RectangleShape>, std::vector<sf::RectangleShape>> crea
                 wall.setPosition(32.0f * x, 32.0f * y);
                 walls.push_back(wall);
             }
-            else if (level[y][x] == "*" || level[y][x] == "%") {
+            else if (level[y][x] == "*" || level[y][x] == "%" || level[y][x] == "$") {
                 sf::RectangleShape intersection(sf::Vector2f(32.0f, 32.0f));
                 intersection.setFillColor(sf::Color::Black);
                 intersection.setPosition(32.0f * x, 32.0f * y);
@@ -110,6 +120,23 @@ std::pair<std::vector<sf::RectangleShape>, std::vector<sf::RectangleShape>> crea
     }
 
     return std::make_pair(walls, intersections);
+}
+
+std::vector<sf::CircleShape> createDots(std::string level[36][28]) {
+    std::vector<sf::CircleShape> dots;
+
+    for (int y = 0; y < 36; y++) {
+        for (int x = 0; x < 28; x++) {
+            if (level[y][x] == " " || level[y][x] == "*") {
+                sf::CircleShape dot(4.f);
+                dot.setFillColor(sf::Color::White);
+                dot.setPosition(32.0f * x + 12, 32.0f * y + 12);
+                dots.push_back(dot);
+            }
+        }
+    }
+
+    return dots;
 }
 
 std::pair<float, float> pacmanInitialPosition() {
@@ -144,6 +171,17 @@ std::pair<float, float> blinkyInitialPosition() {
     return std::make_pair(x_pos, y_pos);
 }
 
+int currentScore = 0;
+
+sf::Text score(int score, const sf::Font& font) {
+    sf::Text scoreText;
+    scoreText.setFont(font);
+    scoreText.setString("HIGH SCORE:" + std::to_string(score));
+    scoreText.setCharacterSize(80);
+    scoreText.setFillColor(sf::Color::White);
+    return scoreText;
+}
+
 sf::Vector2f getMiddlePoint(const sf::RectangleShape& rectangle) {
     // Get the position (top-left corner) and size of the rectangle
     sf::Vector2f position = rectangle.getPosition();
@@ -159,7 +197,7 @@ enum moveDir {
     up, down, left, right, idle
 };
 
-float moveSpeed = 0.07f;
+float moveSpeed = 0.25f;
 
 sf::Vector2f stopMoving() {
     return sf::Vector2f(0.0f, 0.0f);
@@ -246,6 +284,22 @@ float calculateDistance(float x1, float y1, float x2, float y2) {
     float dx = x2 - x1;
     float dy = y2 - y1;
     return std::sqrt(dx * dx + dy * dy);
+}
+
+bool collides(const sf::CircleShape circle1, const sf::CircleShape circle2) {
+    // Get the positions of the centers of the circles
+    sf::Vector2f position1 = circle1.getPosition();
+    sf::Vector2f position2 = circle2.getPosition();
+
+    // Calculate the distance between the centers of the circles
+    float distance = calculateDistance(position1.x, position1.y, position2.x, position2.y);
+
+    // Get the radii of the circles
+    float radius1 = circle1.getRadius();
+    float radius2 = circle2.getRadius();
+
+    // Check if the distance is less than the sum of the radii
+    return distance < (radius1 + radius2);
 }
 
 // Ghost stuff
@@ -456,11 +510,9 @@ int main()
     float x_pos = window.getSize().x / 2;
     sf::View view(sf::FloatRect(0 - x_pos, 0, 1600, 1200));
 
-    // Init Pacman
-    sf::CircleShape pacman(16.f);
-    pacman.setFillColor(sf::Color::Yellow);
-    std::pair<float, float> pacman_pos = pacmanInitialPosition();
-    pacman.setPosition(pacman_pos.first - 16, pacman_pos.second);
+    // Game Font
+    sf::Font font;
+    font.loadFromFile("../VT323-Regular.ttf");
 
     // Blinky (Red Ghost)
     Ghost blinky;
@@ -471,6 +523,13 @@ int main()
     blinky.movementMode = chase;
     blinky.direction = right;
 
+    // Init Pacman
+    sf::CircleShape pacman(16.f);
+    pacman.setFillColor(sf::Color::Yellow);
+    std::pair<float, float> pacman_pos = pacmanInitialPosition();
+    pacman.setPosition(pacman_pos.first - 16, pacman_pos.second);
+    bool dead = false;
+
     // Pacman Directional Stuff
     sf::Vector2f previousDirection(0.0f, 0.0f);
     moveDir direction = left;
@@ -480,6 +539,9 @@ int main()
     std::pair<std::vector<sf::RectangleShape>, std::vector<sf::RectangleShape>> wallsAndIntersections = createWallsAndIntersectionsFor(level);
     std::vector<sf::RectangleShape> walls = wallsAndIntersections.first;
     std::vector<sf::RectangleShape> intersections = wallsAndIntersections.second;
+
+    // Create Dots
+    std::vector<sf::CircleShape> dots = createDots(level);
 
     while (window.isOpen())
     {
@@ -528,6 +590,22 @@ int main()
             } else if (direction == down) {
                 sf::Vector2f nextPosition = pacman.getPosition() + moveDown();
                 pacman.setPosition(nextPosition);
+            }
+        }
+
+        //for (const auto& dot : dots) {
+        //    if (collides(pacman, dot)) {
+        //        currentScore += 10;
+        //        
+        //    }
+        //}
+
+        for (auto it = dots.begin(); it != dots.end();) {
+            if (collides(pacman, *it)) {
+                currentScore += 10;
+                it = dots.erase(it); // Remove the dot from the vector
+            } else {
+                ++it;
             }
         }
 
@@ -615,14 +693,20 @@ int main()
 
         window.clear();
         window.setView(view);
+
+        window.draw(score(currentScore, font));
         
         for (const auto& wall : walls) {
             window.draw(wall);
         }
 
-        for (const auto& intersection : intersections) {
-            window.draw(intersection);
+        for (const auto& dot : dots) {
+            window.draw(dot);
         }
+
+        //for (const auto& intersection : intersections) {
+        //    window.draw(intersection);
+        //}
 
         window.draw(blinky.body);
         window.draw(pacman);

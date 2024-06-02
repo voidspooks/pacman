@@ -64,7 +64,7 @@ std::string level[36][28] = {
     { "#", "*", " ", " ", " ", " ", "*", "#", "#", "*", " ", " ", "*", "#", "#", "*", " ", " ", "*", "#", "#", "*", " ", " ", " ", " ", "*", "#" },
     { "#", "#", "#", "#", "#", "#", " ", "#", "#", "#", "#", "#", "&", "#", "#", "&", "#", "#", "#", "#", "#", " ", "#", "#", "#", "#", "#", "#" },
     { "&", "&", "&", "&", "&", "#", " ", "#", "#", "#", "#", "#", "&", "#", "#", "&", "#", "#", "#", "#", "#", " ", "#", "&", "&", "&", "&", "&" },
-    { "&", "&", "&", "&", "&", "#", " ", "#", "#", "%", "&", "&", "%", "&", "&", "%", "&", "&", "%", "#", "#", " ", "#", "&", "&", "&", "&", "&" },
+    { "&", "&", "&", "&", "&", "#", " ", "#", "#", "%", "&", "&", "%", "&", "B", "%", "&", "&", "%", "#", "#", " ", "#", "&", "&", "&", "&", "&" },
     { "&", "&", "&", "&", "&", "#", " ", "#", "#", "&", "#", "#", "#", "#", "#", "#", "#", "#", "&", "#", "#", " ", "#", "&", "&", "&", "&", "&" },
     { "#", "#", "#", "#", "#", "#", " ", "#", "#", "&", "#", " ", " ", " ", " ", " ", " ", "#", "&", "#", "#", " ", "#", "#", "#", "#", "#", "#" },
     { " ", " ", " ", " ", " ", " ", "*", " ", " ", "%", "#", " ", " ", " ", " ", " ", " ", "#", "&", "#", "#", "*", " ", " ", " ", " ", " ", " " },
@@ -119,6 +119,22 @@ std::pair<float, float> pacmanInitialPosition() {
     for (int y = 0; y < 36; y++) {
         for (int x = 0; x < 28; x++) {
             if (level[y][x] == "O") {
+                x_pos = x * 32;
+                y_pos = y * 32;
+            }
+        }
+    }
+
+    return std::make_pair(x_pos, y_pos);
+}
+
+std::pair<float, float> blinkyInitialPosition() {
+    float x_pos;
+    float y_pos;
+
+    for (int y = 0; y < 36; y++) {
+        for (int x = 0; x < 28; x++) {
+            if (level[y][x] == "B") {
                 x_pos = x * 32;
                 y_pos = y * 32;
             }
@@ -222,22 +238,248 @@ std::string directionToString(moveDir direction) {
     return directionString;
 }
 
+// Calc distance between two float points - needed to figure out pathing for ghosts.
+// Ghosts will use the distance between them and pacman in evaluating their options
+// when they enter an intersection.
+
+float calculateDistance(float x1, float y1, float x2, float y2) {
+    float dx = x2 - x1;
+    float dy = y2 - y1;
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+// Ghost stuff
+
+enum movementMode {
+    chase,
+    scatter,
+    frightened
+};
+
+class Ghost {
+public:
+    bool canMoveUp = false;
+    bool canMoveDown = false;
+    bool canMoveLeft = true;
+    bool canMoveRight = true;
+    sf::CircleShape body;
+    movementMode movementMode;
+    moveDir direction;
+    void setMovableDirections(sf::RectangleShape intersection) {
+        int gridX = intersection.getPosition().x / 32;
+        int gridY = intersection.getPosition().y / 32;
+
+        // Get the surrounding tiles
+        // Tile Above
+        std::string tileAbove = level[gridY - 1][gridX];
+        if (tileAbove == "#") {
+            canMoveUp = false;
+        }
+        else {
+            canMoveUp = true;
+        }
+
+        // Tile Below
+        std::string tileBelow = level[gridY + 1][gridX];
+        if (tileBelow == "#") {
+            print("cannot move into tile below");
+            canMoveDown = false;
+        }
+        else {
+            canMoveDown = true;
+        }
+
+        // Tile Left
+        std::string tileLeft = level[gridY][gridX - 1];
+        if (tileLeft == "#") {
+            canMoveLeft = false;
+        }
+        else {
+            canMoveLeft = true;
+        }
+
+        // Tile Below
+        std::string tileRight = level[gridY][gridX + 1];
+        if (tileRight == "#") {
+            canMoveRight = false;
+        }
+        else {
+            canMoveRight = true;
+        }
+    }
+    void chooseNewDirection(sf::CircleShape pacman) {
+        sf::Vector2f ghostPosition = body.getPosition();
+        sf::Vector2f pacmanPosition = pacman.getPosition();
+        sf::Vector2f newPosition;
+
+        float upTileDistance = 999;
+        float downTileDistance = 999;
+        float leftTileDistance = 999;
+        float rightTileDistance = 999;
+
+        if (canMoveUp) {
+            newPosition = ghostPosition;
+            newPosition.y -= 32;
+            upTileDistance = calculateDistance(newPosition.x, newPosition.y, pacmanPosition.x, pacmanPosition.y);
+        }
+
+        if (canMoveDown) {
+            newPosition = ghostPosition;
+            newPosition.y += 32;
+            downTileDistance = calculateDistance(newPosition.x, newPosition.y, pacmanPosition.x, pacmanPosition.y);
+        }
+
+        if (canMoveLeft) {
+            newPosition = ghostPosition;
+            newPosition.x -= 32;
+            leftTileDistance = calculateDistance(newPosition.x, newPosition.y, pacmanPosition.x, pacmanPosition.y);
+        }
+
+        if (canMoveRight) {
+            newPosition = ghostPosition;
+            newPosition.x += 32;
+            rightTileDistance = calculateDistance(newPosition.x, newPosition.y, pacmanPosition.x, pacmanPosition.y);
+        }
+
+        if (canMoveUp && upTileDistance < downTileDistance && upTileDistance < leftTileDistance && upTileDistance < rightTileDistance) {
+            if (direction == down) {
+                if (canMoveDown) {
+                    direction = down;
+                } else if (canMoveLeft) {
+                    direction = left;
+                } else if (canMoveRight) {
+                    direction = right;
+                } else {
+                    direction = up;
+                }
+            } else {
+                direction = up;
+            }
+        } else if (canMoveDown && downTileDistance < upTileDistance && downTileDistance < leftTileDistance && downTileDistance < rightTileDistance) {
+            if (direction == up) {
+                if (canMoveUp) {
+                    direction = up;
+                } else if (canMoveLeft) {
+                    direction = left;
+                } else if (canMoveRight) {
+                    direction = right;
+                } else {
+                    direction = down;
+                }
+            } else {
+                direction = down;
+            }
+        } else if (canMoveLeft && leftTileDistance < upTileDistance && leftTileDistance < downTileDistance && downTileDistance < rightTileDistance) {
+            if (direction == right) {
+                if (canMoveRight) {
+                    direction = right;
+                } else if (canMoveUp) {
+                    direction = up;
+                } else if (canMoveDown) {
+                    direction = down;
+                } else {
+                    direction = left;
+                }
+            } else {
+                direction = left;
+            }
+        } else if (canMoveRight && rightTileDistance < upTileDistance && rightTileDistance < downTileDistance && rightTileDistance < leftTileDistance) {
+            if (direction == left) {
+                if (canMoveLeft) {
+                    direction = left;
+                } else if (canMoveUp) {
+                    direction = up;
+                } else if (canMoveDown) {
+                    direction = down;
+                } else {
+                    direction = right;
+                }
+            } else {
+                direction = right;
+            }
+        } else {
+            // We don't want the ghost moving through the wall, so if we have trouble
+            // calculating the distance and picking a good direction, let's at least
+            // ensure that the ghost will pick some appropriate path.
+            if (direction == down && !canMoveDown) {
+                if (canMoveLeft) {
+                    direction = left;
+                }
+                else if (canMoveRight) {
+                    direction = right;
+                }
+            } else if (direction == up && !canMoveUp) {
+                if (canMoveLeft) {
+                    direction = left;
+                }
+                else if (canMoveRight) {
+                    direction = right;
+                }
+            } else if (direction == left && !canMoveLeft) {
+                if (canMoveUp) {
+                    direction = up;
+                }
+                else if (canMoveDown) {
+                    direction = down;
+                }
+            } else if (direction == right && !canMoveRight) {
+                if (canMoveUp) {
+                    direction = up;
+                }
+                else if (canMoveDown) {
+                    direction = down;
+                }
+            }
+        }
+    }
+    void move() {
+        sf::Vector2f nextPosition;
+
+        if (direction == up) {
+            nextPosition = body.getPosition() + moveUp();
+        } else if (direction == down) {
+            nextPosition = body.getPosition() + moveDown();
+        } else if (direction == left) {
+            nextPosition = body.getPosition() + moveLeft();
+        } else if (direction == right) {
+            nextPosition = body.getPosition() + moveRight();
+        }
+
+        body.setPosition(nextPosition);
+    }
+};
+
 int main()
 {
+    // Window Init / Camera
     sf::RenderWindow window(sf::VideoMode(800, 600), "Pacman");
     float x_pos = window.getSize().x / 2;
     sf::View view(sf::FloatRect(0 - x_pos, 0, 1600, 1200));
+
+    // Init Pacman
     sf::CircleShape pacman(16.f);
     pacman.setFillColor(sf::Color::Yellow);
     std::pair<float, float> pacman_pos = pacmanInitialPosition();
     pacman.setPosition(pacman_pos.first - 16, pacman_pos.second);
+
+    // Blinky (Red Ghost)
+    Ghost blinky;
+    blinky.body.setFillColor(sf::Color::Red);
+    std::pair<float, float> blinky_pos = blinkyInitialPosition();
+    blinky.body.setPosition(blinky_pos.first - 16, blinky_pos.second);
+    blinky.body.setRadius(16.f);
+    blinky.movementMode = chase;
+    blinky.direction = right;
+
+    // Pacman Directional Stuff
+    sf::Vector2f previousDirection(0.0f, 0.0f);
+    moveDir direction = left;
+    moveDir desiredDirection;
+
+    // Build the Level
     std::pair<std::vector<sf::RectangleShape>, std::vector<sf::RectangleShape>> wallsAndIntersections = createWallsAndIntersectionsFor(level);
     std::vector<sf::RectangleShape> walls = wallsAndIntersections.first;
     std::vector<sf::RectangleShape> intersections = wallsAndIntersections.second;
-    sf::Vector2f previousDirection(0.0f, 0.0f);
-
-    moveDir direction = left;
-    moveDir desiredDirection;
 
     while (window.isOpen())
     {
@@ -252,7 +494,6 @@ int main()
                     pacmanHasMovedOnce = true;
 
                 if (event.key.code == sf::Keyboard::Up) {
-                    
                     desiredDirection = up;
                     if (canMoveUp) direction = up;
                 }
@@ -271,6 +512,9 @@ int main()
             }
         }
 
+        // Ghost movement
+        blinky.move();
+
         if (pacmanHasMovedOnce) {
             if (direction == right) {
                 sf::Vector2f nextPosition = pacman.getPosition() + moveRight();
@@ -288,6 +532,19 @@ int main()
         }
 
         for (const auto& intersection : intersections) {
+            if (collides(blinky.body, intersection)) {
+                sf::Vector2f intersectionMiddlePoint = getMiddlePoint(intersection);
+                sf::Vector2f blinkyMiddlePoint(blinky.body.getPosition().x + blinky.body.getRadius(), blinky.body.getPosition().y + blinky.body.getRadius());
+
+                if (blinkyMiddlePoint.x - intersectionMiddlePoint.x <= 0.1 &&
+                    blinkyMiddlePoint.x - intersectionMiddlePoint.x >= -0.1 &&
+                    blinkyMiddlePoint.y - intersectionMiddlePoint.y <= 0.1 &&
+                    blinkyMiddlePoint.y - intersectionMiddlePoint.y >= -0.1) {
+                    blinky.setMovableDirections(intersection);
+                    blinky.chooseNewDirection(pacman);
+                }
+            }
+
             if (collides(pacman, intersection)) {
                 sf::Vector2f intersectionMiddlePoint = getMiddlePoint(intersection);
                 sf::Vector2f pacmanMiddlePoint(pacman.getPosition().x + pacman.getRadius(), pacman.getPosition().y + pacman.getRadius());
@@ -367,6 +624,7 @@ int main()
             window.draw(intersection);
         }
 
+        window.draw(blinky.body);
         window.draw(pacman);
         window.display();
     }

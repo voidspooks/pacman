@@ -529,6 +529,7 @@ int main()
     std::pair<float, float> pacman_pos = pacmanInitialPosition();
     pacman.setPosition(pacman_pos.first - 16, pacman_pos.second);
     bool dead = false;
+    int extraLives = 2;
 
     // Pacman Directional Stuff
     sf::Vector2f previousDirection(0.0f, 0.0f);
